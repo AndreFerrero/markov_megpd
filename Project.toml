@@ -1,7 +1,10 @@
 name = "markov_megpd"
 authors = ["Andrea Ferrero"]
-[compat]
-julia = "1.12.6"
-DrWatson = "2.19.1"
+
 [deps]
 DrWatson = "634d3b9d-ee7a-5ddf-bec9-22491ea816e1"
+MMEGPD = "d02aded5-1a66-4b42-b82a-b92a4dcda765"
+
+[compat]
+DrWatson = "2.19.1"
+julia = "1.12.6"

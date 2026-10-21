@@ -1,3 +1,6 @@
+using DrWatson
+@quickactivate "markov_megpd"
+
 using Pkg
 using MMEGPD
 using Random
