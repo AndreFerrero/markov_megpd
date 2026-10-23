@@ -5,11 +5,11 @@ using RCall
 using MMEGPD
 
 common = Dict(
-    :n       => [1000],
-    :MC_reps => [5],
+    :n       => [100],
+    :MC_reps => [1],
     :kappa   => [2.0],
     :sigma   => [1.0],
-    :xi      => [-0.3, 0.2],
+    :xi      => [0.2],
 )
 
 # Gumbel and Joe copulas
@@ -147,12 +147,12 @@ function run_scenario(scenario::AbstractDict)
         push!(results, result)
     end
 
-    println("Finished Copula: $cop_fam, cop_param: $cop_param, xi: $xi\n")
+    println("Finished Copula: $cop_fam, xi: $xi\n")
 
     return results
 end
 
-sc_res = run_scenario(all_scenarios[1])
+# sc_res = run_scenario(all_scenarios[1])
 
 function run_experiment(scenarios)
     all_results = map(run_scenario, scenarios)
@@ -160,3 +160,10 @@ function run_experiment(scenarios)
 end
 
 results = run_experiment(all_scenarios)
+
+mkpath(datadir())
+
+safesave(
+    datadir("copula_markov_sim.jld2"),
+    Dict("results" => results)
+)

@@ -1,6 +1,9 @@
 using DataFrames
 using Statistics
 
+res_saved = load(datadir("copula_markov_sim.jld2"))
+results = res_saved["results"][1]
+
 df = DataFrame(results)
 
 scenario_cols = [
