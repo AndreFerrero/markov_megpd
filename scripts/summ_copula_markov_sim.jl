@@ -1,10 +1,10 @@
 using DataFrames
 using Statistics
+using DrWatson
 
-res_saved = load(datadir("copula_markov_sim.jld2"))
-results = res_saved["results"][1]
+df = collect_results(datadir("copulasim"))
 
-df = DataFrame(results)
+df[!,Not([:fit_obj, :status, :seed])]
 
 scenario_cols = [
     :family, :cop_param, :n,
