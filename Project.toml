@@ -4,6 +4,7 @@ authors = ["Andrea Ferrero"]
 [deps]
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DrWatson = "634d3b9d-ee7a-5ddf-bec9-22491ea816e1"
+JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
 MMEGPD = "d02aded5-1a66-4b42-b82a-b92a4dcda765"
 Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 

@@ -10,7 +10,7 @@ include(srcdir("copulasim_funs.jl"))
 name = isempty(ARGS) ? first(readdir(datadir(FITS_SUBDIR))) : ARGS[1]
 
 # df = collect_results(datadir("copulasim"))
-load_simulated_data(name)
+# load_simulated_data(name)
 
 df = collect_results(datadir("copulasimfits/$name"))
 

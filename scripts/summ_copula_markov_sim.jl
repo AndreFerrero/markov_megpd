@@ -2,69 +2,41 @@ using DataFrames
 using Statistics
 using DrWatson
 
-df = collect_results(datadir("copulasim"))
+include(srcdir("copulasim_funs.jl"))
+
+name = isempty(ARGS) ? first(readdir(datadir(FITS_SUBDIR))) : ARGS[1]
+
+# df = collect_results(datadir("copulasim"))
+load_simulated_data(name)
+
+df = collect_results(datadir("copulasimfits/$name"))
 
 df[!,Not([:fit_obj, :status, :seed])]
 
-scenario_cols = [
-    :family, :cop_param, :n,
-    :sigma, :kappa, :xi,
-]
+xi_results = select(
+    df,
+    :family,
+    :tau,
+    :true_xi,
+    :xi_hat,
+    :rep
+)
 
-function mc_metrics(estimates, truth)
-    x = Float64[
-        v for v in estimates
-        if !ismissing(v) && v isa Real && isfinite(v)
-    ]
+xi_summary = combine(
+    groupby(xi_results, [:family, :tau, :true_xi])
+) do g
+    estimates = g.xi_hat
+    truth = first(g.true_xi)
 
-    if isempty(x)
-        return (
-            n_valid = 0,
-            bias = missing,
-            empirical_sd = missing,
-            rmse = missing,
-        )
-    end
-
-    errors = x .- truth
-
-    return (
-        n_valid = length(x),
-        bias = mean(errors),
-        empirical_sd = length(x) > 1 ? std(x) : missing,
-        rmse = sqrt(mean(errors .^ 2)),
+    DataFrame(
+        n_reps = length(estimates),
+        mean_xi_hat = mean(estimates),
+        bias = mean(estimates) - truth,
+        sd_xi_hat = std(estimates),
+        rmse = sqrt(mean((estimates .- truth).^2))
     )
 end
 
-scenario_summary = combine(groupby(df, scenario_cols)) do g
-    successful = g[g.status .== "success", :]
+sort!(xi_summary, [:true_xi, :tau, :family])
 
-    k = mc_metrics(successful.kappa_hat, g.kappa[1])
-    s = mc_metrics(successful.sigma_hat, g.sigma[1])
-    x = mc_metrics(successful.xi_hat, g.xi[1])
-
-    (
-        n_total = nrow(g),
-        n_success = nrow(successful),
-        failure_rate = 1 - nrow(successful) / nrow(g),
-
-        kappa_n_valid = k.n_valid,
-        kappa_bias = k.bias,
-        kappa_sd = k.empirical_sd,
-        kappa_rmse = k.rmse,
-
-        sigma_n_valid = s.n_valid,
-        sigma_bias = s.bias,
-        sigma_sd = s.empirical_sd,
-        sigma_rmse = s.rmse,
-
-        xi_n_valid = x.n_valid,
-        xi_bias = x.bias,
-        xi_sd = x.empirical_sd,
-        xi_rmse = x.rmse,
-    )
-end
-
-sort!(scenario_summary, [:family, :xi, :cop_param])
-
-display(scenario_summary)
+display(xi_summary)

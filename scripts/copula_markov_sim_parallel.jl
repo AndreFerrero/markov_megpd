@@ -1,6 +1,13 @@
 using DrWatson
 @quickactivate "markov_megpd"
 
+include(srcdir("session_info.jl"))
+
+print_session_info()
+
+println("Loading packages")
+flush(stdout)
+
 using RCall
 using MMEGPD
 
@@ -11,6 +18,9 @@ R"""
 library(copula)
 library(CopulaMarkov)
 """
+
+println("Loaded packages in both languages")
+flush(stdout)
 
 R"""
 cop_param_from_tau <- function(family, tau) {
@@ -24,16 +34,17 @@ cop_param_from_tau <- function(family, tau) {
     round(as.numeric(iTau(template, tau)), 2)
 }
 """
-n = 100
-mc_reps = 2
+
+n = 2000
+mc_reps = 50
 true_kappa = 2.0
 true_sigma = 1.0
 true_xi = [-0.2, 0.2]
 
 common = @strdict n mc_reps true_kappa true_sigma true_xi
 
-families = ["gumbel"]
-taus = [0.5]
+families = ["gumbel", "joe", "normal"]
+taus = [0.5, 0.75]
 
 all_scenarios = Dict{String,Any}[]
 
@@ -53,6 +64,17 @@ for family in families, tau in taus
     ))
 
     append!(all_scenarios, family_scenarios)
+end
+
+for (i, scenario) in enumerate(all_scenarios)
+    println("Scenario $i:")
+    flush(stdout)
+    for (key, value) in scenario
+        println("  $key => $value")
+        flush(stdout)
+    end
+    println()
+    flush(stdout)
 end
 
 R"""
@@ -157,15 +179,19 @@ end
 # Experiment: serial simulation, threaded fitting over all (scenario, rep)
 # ---------------------------------------------------------------------------
 function run_experiment(scenarios)
+    experiment_start = time()
+    println("Experiment start: $(Dates.format(now(), "yyyy-mm-dd HH:MM:SS"))")
     flush(stdout)
 
     # Phase 1 (serial): simulate every replication for every scenario
     jobs = Tuple{Dict{String,Any},Any}[]
-    for scenario in scenarios
-        println("Simulating Copula: $(scenario["family"]), xi: $(scenario["true_xi"])")
-        flush(stdout)
 
+    for scenario in scenarios
         for rep in 1:scenario["mc_reps"]
+            if mod(rep, 10) == 0
+                println("Replicate: $rep, Copula: $(scenario["family"]), ξ: $(scenario["true_xi"]), τ: $(scenario["tau"])")
+                flush(stdout)
+            end
             push!(jobs, simulate_replication(scenario, rep))
         end
     end
@@ -175,13 +201,47 @@ function run_experiment(scenarios)
     println("\nFitting $(length(jobs)) replications on $(Threads.nthreads()) threads\n")
     flush(stdout)
 
+    fit_start = time()
+    previous_completion = fit_start
+
+    completion_lock = ReentrantLock()
+
+    total_jobs = length(jobs)
+    completed_jobs = 0
+
     Threads.@threads for i in eachindex(jobs)
+
         result, x = jobs[i]
         fit_replication!(result, x)
-        println("  Done: $(result["family"]), rep $(result["rep"]) -> $(result["status"])")
-        flush(stdout)
+
+        lock(completion_lock) do
+            completed_jobs += 1
+            remaining_jobs = total_jobs - completed_jobs
+
+            completion_time = time()
+            timestamp = Dates.format(now(), "yyyy-mm-dd HH:MM:SS.sss")
+            elapsed_total = completion_time - experiment_start
+            elapsed_fit = completion_time - fit_start
+            elapsed_since_previous = completion_time - previous_completion
+
+            println(
+                "[$timestamp] Done: $(result["family"]), " *
+                    "rep $(result["rep"]) -> $(result["status"]) | " *
+                    "Completed: $completed_jobs/$total_jobs | " *
+                    "Remaining: $remaining_jobs | " *
+                    "Since previous fit: $(round(elapsed_since_previous, digits=3)) s | " *
+                    "Fitting elapsed: $(round(elapsed_fit, digits=3)) s | " *
+                    "Total elapsed: $(round(elapsed_total, digits=3)) s"
+            )
+            flush(stdout)
+
+            previous_completion = completion_time
+        end
 
     end
+
+    println("Experiment finished: $(Dates.format(now(), "yyyy-mm-dd HH:MM:SS"))")
+    flush(stdout)
 
     # Same ordering as the serial version
     return Dict{String,Any}[first(j) for j in jobs]
@@ -193,6 +253,8 @@ ignore_keys = ("mc_reps", "kappa_hat", "sigma_hat", "xi_hat",
     "chosen_lambda", "status")
 folder_dir = "copulasim_mcreps=$(mc_reps)_n=$(n)_families=$(join(families, "_"))_taus=$(join(taus, "_"))_true_xi=$(join(true_xi, "_"))"
 
+println("Saving at $folder_dir")
+
 for d in results
     wsave(
         datadir(
@@ -202,3 +264,5 @@ for d in results
         d
     )
 end
+
+println("Finished and saved")
