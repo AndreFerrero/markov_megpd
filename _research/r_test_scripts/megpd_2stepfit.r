@@ -13,7 +13,7 @@ fit_megpd_bivariate <- function(x, y, bernstein = FALSE, m_degree = NULL, k = 10
   # 1. First Step: Radial component EGPD
   # The paper suggests m = floor(0.5 * n / log(n)) for Bernstein degree
   if (bernstein | !is.null(m_degree)) {
-    if(is.null(m_degree)) {
+    if (is.null(m_degree)) {
       m_degree <- floor(0.5 * n / log(n))
     }
 
@@ -23,9 +23,7 @@ fit_megpd_bivariate <- function(x, y, bernstein = FALSE, m_degree = NULL, k = 10
       method = "bernstein",
       bernstein.m = m_degree
     )
-  }
-
-  else {
+  } else {
     fit_r <- egpd::fitegpd(R)
   }
 
@@ -57,18 +55,16 @@ fit_megpd_bivariate <- function(x, y, bernstein = FALSE, m_degree = NULL, k = 10
   return(results)
 }
 
-fit_megpd_ts<- function(x_ts, bernstein = FALSE, m_degree = NULL, k = 10, type_s = "cr", mps = 2) {
+fit_megpd_ts <- function(x_ts, bernstein = FALSE, m_degree = NULL, k = 10, type_s = "cr", mps = 2) {
   x <- x_ts[-length(x_ts)]
   y <- x_ts[-1]
 
   fit_megpd_bivariate(x, y, bernstein, m_degree, k, type_s, mps)
 }
 
-plot_delta <- function(fit_delta, R, min_grid = 0) {
-  
-  R_grid <- seq(min_grid, max(R), length.out = 500)
+plot_delta <- function(fit_delta, r_grid, plot = TRUE) {
 
-  newdat <- data.frame(R = R_grid, V = 0)
+  newdat <- data.frame(R = r_grid, V = 0)
 
   pred <- predict(fit_delta, newdata = newdat, type = "link", se.fit = TRUE)
 
@@ -77,17 +73,26 @@ plot_delta <- function(fit_delta, R, min_grid = 0) {
   eta_lo <- eta - 1.96 * se
   eta_hi <- eta + 1.96 * se
 
-  sigma_hat <- exp(eta) + 0.01
-  sigma_lo <- exp(eta_lo) + 0.01
-  sigma_hi <- exp(eta_hi) + 0.01
+  sigma_hat <- exp(eta)
+  sigma_lo <- exp(eta_lo)
+  sigma_hi <- exp(eta_hi)
 
-  plot(R_grid, sigma_hat,
-    type = "l", lwd = 2,
-    xlab = "R",
-    ylab = expression(delta(R)),
-    ylim = c(0, max(sigma_hi) * 1.2)
-  )
+  if (plot) {
+    plot(r_grid, sigma_hat,
+      type = "l", lwd = 2,
+      xlab = "R",
+      ylab = expression(delta(R)),
+      ylim = c(0, max(sigma_hi) * 1.2)
+    )
 
-  lines(R_grid, sigma_lo, col = "red", lty = 2)
-  lines(R_grid, sigma_hi, col = "red", lty = 2)
+    lines(r_grid, sigma_lo, col = "red", lty = 2)
+    lines(r_grid, sigma_hi, col = "red", lty = 2)
+  }
+
+  invisible(data.frame(
+    R = r_grid,
+    delta_hat = sigma_hat,
+    delta_lo = sigma_lo,
+    delta_hi = sigma_hi
+  ))
 }
