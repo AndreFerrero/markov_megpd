@@ -75,7 +75,16 @@ delta_copula <- function(
       stop.on.error = TRUE
     )$value
 
-    numerator <- integrate(
+    num1 <- integrate(
+      f = function(z) z * g(z, ri),
+      lower = -Inf,
+      upper = Inf,
+      rel.tol = rel.tol,
+      subdivisions = subdivisions,
+      stop.on.error = TRUE
+    )$value
+
+    num2 <- integrate(
       f = function(z) z^2 * g(z, ri),
       lower = -Inf,
       upper = Inf,
@@ -88,10 +97,7 @@ delta_copula <- function(
       stop("Invalid normalizing integral at radius ", ri)
     }
 
-    # print(paste0("Numerator: ", numerator))
-    # print(paste0("Denominator: ", denominator))
-
-    sqrt(numerator / denominator)
+    sqrt(num2 / denominator) - num1/denominator
 
   }, numeric(1))
 }

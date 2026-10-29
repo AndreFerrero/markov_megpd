@@ -1,14 +1,16 @@
 library(copula)
 library(egpd)
-source("C:/Users/andre/markov_megpd/_research/r_test_scripts/megpd_2stepfit.r")
-source("C:/Users/andre/markov_megpd/_research/r_test_scripts/delta_copula.r")
+library(here)
+
+source(here("_research", "r_test_scripts", "megpd_2stepfit.r"))
+source(here("_research","r_test_scripts","delta_copula.r"))
 
 set.seed(46)
 theta <- 6
-cop <- gumbelCopula(theta)
+cop <- joeCopula(theta)
 xi_true <- -0.2
 
-U <- rCopula(100000, cop)
+U <- rCopula(2000, cop)
 X <- apply(U, 2, qegpd, kappa = 2, sigma = 1, xi = xi_true)
 # hist(X[,2])
 R <- X[, 1] + X[, 2]
