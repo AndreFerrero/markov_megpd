@@ -79,3 +79,5 @@ legend(
   lwd = c(2, 1, 2),
   bty = "n"
 )
+
+rug(R, side = 1, ticksize = 0.03, col = rgb(0, 0, 0, 0.3))
