@@ -1,11 +1,14 @@
-
+using DrWatson
+@quickactivate "markov_megpd"
 using MMEGPD
 using RCall
 using StatsPlots
 using StatsBase
+using Random
+using JLD2
 
-R"source(\"winter2016/load_data.R\")"
-
+R"source(\"scripts/winter2016/load_data.R\")"
+data = rcopy(R"data")
 x = rcopy(R"j.data")
 
 R = x[:,1] .+ x[:,2]
@@ -32,61 +35,30 @@ histogram(R)
 
 K = 10
 
-test_lambda = 10
-test_p = 2
-
-test_fit = MMEGPD.fit_markov_megpd_splines(
+la_fit = MMEGPD.laplace_optimize(
     x, K;
-    degree=3,
-    p=test_p,
-    lambda=test_lambda,
-    map=false,
     verbose=true,
     x_reltol=1e-5,
-    kappa_init=30,
-    sigma_init=10
+    kappa_init=30.0,
+    sigma_init=10.0
 )
 
-test_fit.theta
+@save "data/winter2016/la_fit_mmegpd_K10.jld2" la_fit data x
 
-MMEGPD.plot_spline(test_fit, r_grid; plot_fn = true)
-plot!(title = "λ = $test_lambda; p = $test_p", legend = :topright)
+fit_opt = la_fit.best_fit
+fit_opt.theta
+
+MMEGPD.plot_spline(fit_opt)
+plot!(title = "λ = $(la_fit.best_lambda)", legend = :topright)
 plot!(ylims = (0, 0.3))
 
+fit_opt.basis
 
-grid_plot = MMEGPD.evaluate_lambda_grid(
-    x, K; p = 2, lower = 0.0, ngrid = 15, x_reltol = 1e-5, verbose = true
-)
+delta_fit = delta_spline(fit_opt.basis, fit_opt.beta)
 
-using Plots
-plot(
-    grid_plot.log10lambda,
-    grid_plot.logL,
-    marker=:circle,
-    xlabel="log10(λ)",
-    ylabel="Laplace marginal log likelihood",
-    title="Laplace objective; K = $K, p = 2",
-    legend=false
-)
+Random.seed!(1234)
+M = 150
+x0data = rand(x, M)
+xrep = MMEGPD.multiple_megpd_chains(M, 2000, fit_opt.theta[1], fit_opt.theta[2], fit_opt.theta[3], delta_fit; x0 = x0data)
 
-plot(
-    grid_plot.lambda,
-    grid_plot.logL,
-    marker=:circle,
-    xlabel="λ",
-    ylabel="Laplace marginal log likelihood",
-    title="Laplace objective; K = $K, p = 2",
-    legend=false
-)
-
-i = argmax(grid_plot.logL)
-
-max_logL = grid_plot.logL[i]
-max_lambda = grid_plot.lambda[i]
-max_log10lambda = grid_plot.log10lambda[i]
-
-println("Maximum logL = ", max_logL)
-println("λ = ", max_lambda)
-println("log10(λ) = ", max_log10lambda)
-
-la_res_optimonly = MMEGPD.laplace_optimize(x,K; p = 2, map = true, verbose = true, x_reltol=1e-5)
+@save datadir("winter2016/xrep_la_fit_mmegpd_K10.jld2") xrep x0data
