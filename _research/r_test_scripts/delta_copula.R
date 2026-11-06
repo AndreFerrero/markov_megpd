@@ -47,7 +47,7 @@ delta_copula <- function(
     u2 <- Fm(y)
 
     # Avoid evaluating the copula density exactly at its boundaries
-    eps <- 1e-20
+    eps <- 1e-14
     u1 <- pmin(pmax(u1, eps), 1 - eps)
     u2 <- pmin(pmax(u2, eps), 1 - eps)
 
