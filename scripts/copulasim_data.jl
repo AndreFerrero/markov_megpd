@@ -19,15 +19,6 @@ library(CopulaMarkov)
 """
 
 R"""
-cop_param_from_tau <- function(family, tau) {
-    template <- switch(
-        family,
-        gumbel = gumbelCopula(dim = 2),
-        joe    = joeCopula(dim = 2),
-        normal = normalCopula(dim = 2)
-    )
-    round(as.numeric(iTau(template, tau)), 2)
-}
 
 sim_cm <- function(family, cop_param, margin_par, n, seed, max_try = 20) {
   set.seed(seed)
@@ -51,26 +42,34 @@ sim_cm <- function(family, cop_param, margin_par, n, seed, max_try = 20) {
 # Design of the experiment
 # ---------------------------------------------------------------------------
 n = 2000
-mc_reps = 50
+mc_reps = 20
 true_kappa = 2.0
 true_sigma = 1.0
 true_xi = [-0.2, 0.2]
 
 families = ["gumbel", "joe", "normal"]
-taus = [0.5, 0.75]
+cop_params = Dict(
+    "gumbel" => [2.0, 4.0],
+    "joe"    => [2.0, 4.0],
+    "normal" => [0.5, 0.75],
+)
 
 common = @strdict n mc_reps true_kappa true_sigma true_xi
 
 all_scenarios = Dict{String,Any}[]
-for family in families, tau in taus
-    cop_param = rcopy(Float64, R"cop_param_from_tau($family, $tau)")
+
+for family in families, cop_param in cop_params[family]
     append!(all_scenarios, dict_list(merge(
         common,
-        Dict("family" => [family], "tau" => [tau], "cop_param" => [cop_param]),
+        Dict(
+            "family" => [family],
+            "cop_param" => [cop_param],
+        ),
     )))
 end
 
-name = experiment_name(; n, mc_reps, families, taus, true_xi)
+name = experiment_name(; n, mc_reps, families, true_xi)
+
 println("Experiment folder: ", simdata_dir(name))
 
 # ---------------------------------------------------------------------------
@@ -101,12 +100,12 @@ function simulate_all(name, scenarios)
             n_ok += 1
         catch err
             n_fail += 1
-            @warn "Simulation failed" family = scenario["family"] tau = scenario["tau"] rep = rep error = sprint(showerror, err)
+            @warn "Simulation failed" family = scenario["family"] rep = rep error = sprint(showerror, err)
         end
 
         if rep % 10 == 0
             println("[$(Dates.format(Dates.now(), "HH:MM:SS"))] ",
-                    "$(scenario["family"]), τ=$(scenario["tau"]), rep $rep ",
+                    "$(scenario["family"]), rep $rep ",
                     "(ok=$n_ok, failed=$n_fail, $(round(time() - t0, digits=1)) s)")
             flush(stdout)
         end

@@ -19,9 +19,9 @@ const FITS_SUBDIR = "copulasimfits"
 # ---------------------------------------------------------------------------
 
 """Folder name identifying one simulation experiment."""
-experiment_name(; n, mc_reps, families, taus, true_xi) =
+experiment_name(; n, mc_reps, families, true_xi) =
     "mcreps=$(mc_reps)_n=$(n)_families=$(join(families, "_"))" *
-    "_taus=$(join(taus, "_"))_true_xi=$(join(true_xi, "_"))"
+    "_true_xi=$(join(true_xi, "_"))"
 
 """File name for one (scenario, replication). `meta` must not contain the data."""
 simdata_filename(meta::AbstractDict) =
@@ -78,14 +78,14 @@ end
 
 """Fit one replication. `job` contains metadata and "x". Returns a result Dict
 (without the data) with estimates and status."""
-function fit_replication(job::AbstractDict; n_lambda::Integer=10,
+function fit_replication(job::AbstractDict; K::Integer=10,
                          spline=:crspline, knot_method=:quantile, x_reltol=1e-5)
     result = Dict{String,Any}(k => v for (k, v) in job if k != "x")
     result["status"] = "failed"
 
     try
         fit = MMEGPD.laplace_optimize(
-            job["x"], n_lambda;
+            job["x"], K;
             spline=spline, knot_method=knot_method, x_reltol=x_reltol)
 
         best_fit = fit.best_fit
@@ -127,7 +127,7 @@ function run_fits(jobs::AbstractVector; kwargs...)
             now_t = time()
             ts = Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS")
             println(
-                "[$ts] Done: $(result["family"]), τ=$(result["tau"]), " *
+                "[$ts] Done: $(result["family"]) " *
                 "rep $(result["rep"]) -> $(result["status"]) | " *
                 "Completed: $(completed[])/$total_jobs | " *
                 "Since previous: $(round(now_t - previous[], digits=2)) s | " *

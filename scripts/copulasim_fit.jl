@@ -46,7 +46,7 @@ t0 = time()
 println("Fit start: ", Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS"))
 flush(stdout)
 
-results = run_fits(jobs; n_lambda=10, spline=:crspline,
+results = run_fits(jobs; K=10, spline=:crspline,
                    knot_method=:quantile, x_reltol=1e-5)
 
 println("Fit finished in $(round(time() - t0, digits=1)) s")

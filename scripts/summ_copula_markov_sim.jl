@@ -16,14 +16,14 @@ df[!,Not([:fit_obj, :status, :seed])]
 xi_results = select(
     df,
     :family,
-    :tau,
+    :cop_param,
     :true_xi,
     :xi_hat,
     :rep
 )
 
 xi_summary = combine(
-    groupby(xi_results, [:family, :tau, :true_xi])
+    groupby(xi_results, [:family, :cop_param, :true_xi])
 ) do g
     estimates = g.xi_hat
     truth = first(g.true_xi)
@@ -37,6 +37,6 @@ xi_summary = combine(
     )
 end
 
-sort!(xi_summary, [:true_xi, :tau, :family])
+sort!(xi_summary, [:true_xi, :cop_param, :family])
 
 display(xi_summary)
