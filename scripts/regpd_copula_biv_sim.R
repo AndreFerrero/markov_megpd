@@ -5,13 +5,47 @@ library(here)
 # Simulation settings
 set.seed(123)
 
-n <- 100000       # Sample size per dataset
-B <- 100        # Number of simulation repetitions
+# FOR LOCAL USE ONLY
+# n <- 100000       # Sample size per dataset
+# B <- 1000        # Number of simulation repetitions
+# xi_true <- 0.2
+# # True data-generating copula
+# theta <- 4
+# cop <- joeCopula(theta)
+# m_degree <- 10
+
+# FOR SLURM USE ONLY
+# Simulation settings (provided by SLURM)
+args <- commandArgs(trailingOnly = TRUE)
+
+copula_family <- args[1]
+theta <- as.numeric(args[2])
+B <- as.integer(args[3])
+n <- as.integer(args[4])
+m_degree <- as.integer(args[5])
+
+# Fixed parameters
+set.seed(123)
+
 xi_true <- 0.2
-# True data-generating copula
-theta <- 2
-cop <- joeCopula(theta)
-m_degree <- 10
+
+# Select copula
+cop <- switch(
+  copula_family,
+  joe = joeCopula(theta),
+  gumbel = gumbelCopula(theta),
+  stop("Unknown copula family: ", copula_family)
+)
+
+scenario <- paste0(
+  copula_family,
+  theta,
+  "_radialegpd_m", m_degree,
+  "B", B,
+  "n", n
+)
+
+print(scenario)
 
 # Storage for results
 results <- data.frame(
@@ -25,7 +59,7 @@ results <- data.frame(
 # Repeat the simulation and fitting
 for (b in seq_len(B)) {
 
-  # Generate a new dataset from the same Joe copula
+  # Generate a new dataset from the same copula
   U <- rCopula(n, cop)
 
   # Transform uniforms to EGPD margins
@@ -96,11 +130,15 @@ print(summary_xi)
 # Inspect individual estimates
 print(head(results))
 
-save(valid, summary_xi,
-file = here("data", "joe2_radialegpd_m10B100n100k.Rdata"))
+save(
+  valid,
+  summary_xi,
+  results,
+  file = here("data", paste0(scenario, ".Rdata"))
+)
 
 # Visualize the distribution of xi estimates
-png(here("plots", "joe2_radialegpd_m10B100n100k.png"))
+png(here("plots", paste0(scenario, ".png")))
 hist(
   valid,
   breaks = 30,
