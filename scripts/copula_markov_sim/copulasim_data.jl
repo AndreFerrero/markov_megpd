@@ -41,11 +41,11 @@ sim_cm <- function(family, cop_param, margin_par, n, seed, max_try = 20) {
 # ---------------------------------------------------------------------------
 # Design of the experiment
 # ---------------------------------------------------------------------------
-n = 2000
-mc_reps = 20
+n = 100000
+mc_reps = 50
 true_kappa = 2.0
 true_sigma = 1.0
-true_xi = [-0.2, 0.2]
+true_xi = [0.2]
 
 families = ["gumbel", "joe", "normal"]
 cop_params = Dict(

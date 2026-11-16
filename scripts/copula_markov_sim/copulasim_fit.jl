@@ -30,6 +30,8 @@ flush(stdout)
 #     error("Pass the experiment folder name as argument. Available: $available")
 # end
 # name = ARGS[1]
+
+# Returns the name of the directory where data is stored if ARGS is empty
 name = isempty(ARGS) ? first(readdir(datadir(SIMDATA_SUBDIR))) : ARGS[1]
 
 # ---------------------------------------------------------------------------
@@ -46,7 +48,7 @@ t0 = time()
 println("Fit start: ", Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS"))
 flush(stdout)
 
-results = run_fits(jobs; K=10, spline=:crspline,
+results = run_fits(jobs; K=5, bernstein = true, spline=:crspline,
                    knot_method=:quantile, x_reltol=1e-5)
 
 println("Fit finished in $(round(time() - t0, digits=1)) s")

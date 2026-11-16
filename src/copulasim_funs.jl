@@ -79,6 +79,7 @@ end
 """Fit one replication. `job` contains metadata and "x". Returns a result Dict
 (without the data) with estimates and status."""
 function fit_replication(job::AbstractDict; K::Integer=10,
+                         bernstein = false, bernstein_m = 5,
                          spline=:crspline, knot_method=:quantile, x_reltol=1e-5)
     result = Dict{String,Any}(k => v for (k, v) in job if k != "x")
     result["status"] = "failed"
@@ -86,15 +87,18 @@ function fit_replication(job::AbstractDict; K::Integer=10,
     try
         fit = MMEGPD.laplace_optimize(
             job["x"], K;
-            spline=spline, knot_method=knot_method, x_reltol=x_reltol)
+            bernstein = bernstein,
+            bernstein_m = bernstein_m,
+            spline=spline,
+            knot_method=knot_method,
+            x_reltol=x_reltol)
 
         best_fit = fit.best_fit
         result["fit_obj"] = best_fit
 
-        theta_hat = best_fit.theta
-        result["kappa_hat"] = theta_hat[1]
-        result["sigma_hat"] = theta_hat[2]
-        result["xi_hat"] = theta_hat[3]
+        result["theta"] = best_fit.theta
+        result["weights"] = best_fit.w
+        result["beta"] = best_fit.beta
         result["chosen_lambda"] = fit.best_lambda
         result["status"] = "success"
     catch err
