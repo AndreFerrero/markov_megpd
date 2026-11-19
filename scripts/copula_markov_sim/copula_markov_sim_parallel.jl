@@ -221,18 +221,15 @@ function fit_replication!(
             bernstein_m = result["bernstein_m"],
             spline = result["spline"],
             knot_method = result["knot_method"],
-            x_reltol = result["x_reltol"]
+            x_reltol = result["x_reltol"],
+            verbose = true
         )
 
         best_fit = fit.best_fit
 
         result["fit_obj"] = best_fit
 
-        theta_hat = best_fit.theta
-
-        result["kappa_hat"] = theta_hat[1]
-        result["sigma_hat"] = theta_hat[2]
-        result["xi_hat"] = theta_hat[3]
+        result["theta_hat"] = best_fit.theta
 
         result["chosen_lambda"] = fit.best_lambda
         result["status"] = "success"
@@ -389,12 +386,12 @@ results = run_scenario(scenario)
 # ============================================================
 
 folder_dir = "copulasim" *
-    "_family=$(family)" *
-    "_cop_param=$(cop_param)" *
-    "_MC=$(mc_reps)" *
-    "_n=$(n)" *
-    "_xi=$(join(true_xi, "_"))" *
-    "_bernstein=$(bernstein_m)"
+    "_$(family)" *
+    "_cop_param$(cop_param)" *
+    "_MC$(mc_reps)" *
+    "_n$(n)" *
+    "_xi$(join(true_xi, "_"))" *
+    "_bernstein$(bernstein_m)"
 
 output_dir = datadir(folder_dir)
 
@@ -407,11 +404,12 @@ flush(stdout)
 ignore_keys = (
     "fit_obj",
     "error",
-    "kappa_hat",
-    "sigma_hat",
-    "xi_hat",
+    "theta_hat",
     "chosen_lambda",
     "status",
+    "spline",
+    "knot_method",
+    "x_reltol"
 )
 
 for d in results

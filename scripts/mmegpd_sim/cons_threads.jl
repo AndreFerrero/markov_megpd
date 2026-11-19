@@ -17,7 +17,7 @@ function run_replicate(rep, seed, n, K, kappa, xi, delta_true; kwargs...)
     
     x = MMEGPD.simulate_markov_megpd(n, theta, delta_true; show_progress=false)
 
-    Core.println("\n Replicate $rep; optimizing λ")
+    Core.println("\n Replicate $rep; optimizing lambda")
 
     la_res = MMEGPD.laplace_optimize(x, K; kwargs...)
     return la_res.best_fit
@@ -29,7 +29,7 @@ function run_simulation_study(nrep, n, K, kappa, xi, delta_true; seed = 1234, kw
     Threads.@threads for i in 1:nrep
         Core.println("\n Starting replicate $i")
         fits[i] = run_replicate(i, seed, n, K, kappa, xi, delta_true; kwargs...)
-        Core.println("\n Finished replicate $i, remaining: $(nrep-i)/$nrep")
+        Core.println("\n Finished replicate $i")
 
     end
     return fits
@@ -50,11 +50,11 @@ delta_true = :delta_exp
 
 fits = run_simulation_study(
     nrep, n, K, kappa, xi, delta_true;
-    bernstein = true,
+    bernstein = true, verbose = false,
     lower = 1.5, upper = 4.0, x_reltol = 1e-6
 )
 
-save_file = joinpath(datadir(), "cons_bern_egpd_crs_nrep100_n2k_K5_xi02_deltaexp.jld2")
+save_file = joinpath(datadir(), "rand_start_cons_bern_egpd_crs_nrep100_n2k_K5_bm5_xi02_deltaexp.jld2")
 
 @save save_file fits nrep n K kappa xi delta_true
 

@@ -1,7 +1,7 @@
 using DrWatson
 @quickactivate "markov_megpd"
 
-save_file = joinpath(datadir(), "cons_bern_egpd_crs_nrep100_n2k_K5_xi02_deltaexp.jld2")
+save_file = joinpath(datadir(), "rand_start_cons_bern_egpd_crs_nrep100_n2k_K5_bm5_xi02_deltaexp.jld2")
 
 using JLD2
 using Statistics
@@ -29,8 +29,10 @@ df = DataFrame(
 
 println(df)
 
-mean(df[:,2])
-median(df[:,2])
+mean(df[:,3])
+median(df[:,3])
+std(df[:,3])
+quantile(df[:,3], [0.25, 0.75])
 
 p1 = @df df boxplot(
     :kappa_hat,
@@ -78,7 +80,7 @@ display(p_box)
 
 
 
-MMEGPD.plot_spline(fits[30]; delta_true=:delta_exp)
+MMEGPD.plot_spline(fits[100]; delta_true=:delta_exp)
 
 
 # Average Bernstein cdf
