@@ -8,10 +8,10 @@ set.seed(123)
 # FOR LOCAL USE ONLY
 n <- 100000       # Sample size per dataset
 B <- 1000        # Number of simulation repetitions
-xi_true <- 0.2
 # True data-generating copula
 theta <- 2
-cop <- gumbelCopula(theta)
+d <- 2
+cop <- gumbelCopula(theta, dim = d)
 
 # Fixed parameters
 set.seed(123)
@@ -19,24 +19,6 @@ set.seed(123)
 qprob <- 0.98
 
 xi_true <- 0.2
-
-# Select copula
-cop <- switch(
-  copula_family,
-  joe = joeCopula(theta),
-  gumbel = gumbelCopula(theta),
-  stop("Unknown copula family: ", copula_family)
-)
-
-scenario <- paste0(
-  "gpd_"
-  copula_family,
-  theta,
-  "B", B,
-  "n", n
-)
-
-print(scenario)
 
 # Storage for results
 results <- data.frame(
@@ -58,7 +40,7 @@ for (b in seq_len(B)) {
     xi = xi_true
   )
 
-  R <- X[, 1] + X[, 2]
+  R <- apply(X, 1, sum)
 
   quantR <- quantile(R, qprob)
 

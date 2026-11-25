@@ -6,13 +6,21 @@ library(here)
 set.seed(123)
 
 # FOR LOCAL USE ONLY
-# n <- 100000       # Sample size per dataset
+# n <- 1000       # Sample size per dataset
 # B <- 1000        # Number of simulation repetitions
 # xi_true <- 0.2
 # # True data-generating copula
-# theta <- 4
-# cop <- joeCopula(theta)
-# m_degree <- 10
+# theta <- 2
+# cop <- gumbelCopula(theta)
+# m_degree <- 72
+
+# (scenario <- paste0(
+#   "gumbel",
+#   theta,
+#   "_radialegpd_m", m_degree,
+#   "B", B,
+#   "n", n
+# ))
 
 # FOR SLURM USE ONLY
 # Simulation settings (provided by SLURM)
@@ -70,7 +78,8 @@ for (b in seq_len(B)) {
     xi = xi_true
   )
 
-  R <- X[, 1] + X[, 2]
+  R <- apply(X, 1, sum)
+  
   # Fit the MEGPD model
   fit <- tryCatch(
     fitegpd(
@@ -107,6 +116,8 @@ for (b in seq_len(B)) {
     message("Completed ", b, " / ", B)
   }
 }
+
+# load(here("data", paste0(scenario, ".Rdata")))
 
 # Keep successful estimates
 valid <- results$xi_hat[is.finite(results$xi_hat)]
