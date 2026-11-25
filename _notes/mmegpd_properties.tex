@@ -1,0 +1,119 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{amsmath}
+
+\title{Markov Modelling with the MEGPD: properties and proofs}
+\author{Andrea Ferrero}
+
+\begin{document}
+
+\maketitle
+
+\section{Model definition}
+
+The Markov chain is defined on a continuous state space by the transition density $p(y|x) = p(x,y) / p_X(x)$ where the joint density is that of the multivariate EGP model and the common marginal $p_X(x)$ is the implied Extended GPD.
+
+More precisely, the EGPD distribution function is defined by:
+
+\begin{equation*}
+  F(x) = B(H_\xi(x)^\kappa),
+\end{equation*}
+
+where $H_\xi$ is the GPD, $\kappa$ is a positive parameter and $B$ is an absolutely continuous cdf on $[0, 1]$ whose derivative satisfies: $0<b(0)<\infty$ and $0 < b(1) < \infty$.
+
+The density $f(x)$ of an EGPD is:
+
+\begin{equation*}
+  f(x) = \kappa h_\xi(x) H_\xi(x)^{\kappa-1} b(H_\xi(x)^\kappa).
+\end{equation*}
+
+Recall that the EGPD is a regularly varing random variable both at infinity and at zero, more precisely $X \in RV_{\frac{1}{\xi}}^\infty$ and $X \in RV_\kappa^0$. Regular variation at infinity and at zero come from the conditions imposed on the $B$ function.
+
+Namely, we have that:
+
+\begin{equation*}
+  \lim_{x \to \infty} \frac{f(x)}{\kappa h_\xi(x)} = b(1),
+\end{equation*}
+
+and for the lower tail:
+
+\begin{equation*}
+  \lim_{x \to 0} \frac{f(x)}{\kappa x^{\kappa-1}} = b(0).
+\end{equation*}
+
+From the density behaviours it follows that the density of an EGPD is $RV_{-\frac{1}{\xi} - 1}^\infty$ and $RV_{\kappa - 1}^0$.
+
+The join density of the MEGPD is then defined on the radial/angular decomposition of the vector, leading to:
+
+\begin{equation*}
+  p(x, y) = p_R(x + y) \phi_{\delta(x+y)}(\log \frac{x}{y}) \frac{x+y}{xy},
+\end{equation*}
+
+where $p_R$ is another EGPD density (note that the sum of EGPD leads to an EGPD with the same tail index $\xi$) while $\phi_\delta$ is the density of the zero mean normal with variance $\delta(x+y)^2$. By assumption, we have that $\delta(x+y) \to \delta_0 > 0$, $\delta(x+y) \to \delta_\infty$ for the radius $r = x + y$ going to zero and infinity, respectively.
+
+Note that both the joint and the marginal densities are continuous and positive on $(0, \infty)^2$ and $(0, \infty)$, respectively.
+
+\section{Ergodicity of the Markov chain}
+
+Using the MEGPD to construct a Markov chain (of order one) we can show that the resulting chain is ergodic.
+
+Recall that for a Markov chain to be ergodic, we need to show that it adimts a \textbf{stationary} distribution and that the chain is \textbf{irreducible} and \textbf{aperiodic}.
+
+To fix notation, we generally work on a measurable space $(E, \mathcal{E})$, where in our case $E = (0, \infty)$, from which we define the Markov transition kernel as the function:
+
+\begin{equation}
+  \Pi: (E, \mathcal{E}) \to [0, 1],
+\end{equation}
+
+which represents the probability of moving to a measurable set A from a starting state x. Indeed, if the transition probability admits a density (as in our case):
+
+\begin{equation}
+  \Pi(x, A) = \int_A p(y \mid x) dy.
+\end{equation}
+
+When we write $\Pi^n(x, A)$, we refer to the probability of starting from $x$ and landing in A after n steps.
+
+\subsection{Stationarity}
+
+We can show that the Markov chain defined by the MEPGD adimts a stationary distribution $\pi$, which coincides with the common marginal EGPD $p_X$, simply by using the fact that the joint distribution is symmetric, because it is the product of $p_R(x+y)$ (symmetric), $\phi_\delta(x+y)(\log \frac{x}{y})$ (symmetric by definition), the Jacobian product (symmetric as well). It suffices then to show the detailed balance condition.
+
+In general, the detailed balance condition says that for $\pi$ a stationary distribution (or raher its density) the following holds true:
+
+\begin{equation}
+  \pi(x) p(y \mid x) = \pi(y) p(x \mid y).
+\end{equation}
+
+For our case, this immediate with $\pi = p_X$ because the joint distribution is symmetric:
+\begin{equation*}
+  p_X(x) p(y \mid x) = p(x,y) = p(y,x) = p_X(y) p(x \mid y).
+\end{equation*}
+
+\subsection{Irreducibility}
+In general, irreducibility (with respect to some measure, here the Lebesgue measure $\lambda$) says that for every starting state $x$, and every measurable set A with $\lambda(A)$, there exists an integer $n \geq 1$ such that the transition distribution $P^n(x, A) > 0$.
+
+In our case, this is immediate from the assumption that both the joint and marginal densities of the Markov chain (and therefore the conditional density) are positive on $E = (0, \infty)$. For $n=1$, we have that:
+
+\begin{equation*}
+  P(x, A) = \int_A k(y \mid x) dy > 0.
+\end{equation*}
+
+This follows from the following fact. For fixed x, define:
+
+\begin{equation*}
+  A_m = \{ y \in A : p(y \mid x) \geq \frac{1}{m}\}.
+\end{equation*}
+
+from which we have $A = \bigcup A_m$ because of the positivity of the conditional density. Since we assumed that $\lambda(A) > 0$, it must be that there exist some $n$ such that $\lambda(A_m)>0$. Therefore:
+
+\begin{align*}
+  \int_A p(y \mid x) dy &\geq \int_{A_m} p(y \mid x) dy \\
+                        &\geq \frac{1}{m} \lambda(A_m) \\
+                        &> 0
+\end{align*}
+
+Irreducibility also guarantees that the stationary distribution is unique.
+
+\subsection{Small Sets}
+For aperiodicity as well as for later, we need to define what we mean by small sets.
+
+\end{document}
