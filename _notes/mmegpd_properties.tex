@@ -1,8 +1,42 @@
 \documentclass{article}
 \usepackage{graphicx} % Required for inserting images
 \usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{cleveref}
+\usepackage{aliascnt}
+\usepackage{dsfont}
 
-\title{Markov Modelling with the MEGPD: properties and proofs}
+\usepackage[
+    backend=biber,
+    style=authoryear,
+    sorting=nyt,
+    url=false,
+    dashed=false,
+    giveninits=true,
+    maxnames=99,
+    maxcitenames=2,
+    mincitenames=1
+]{biblatex}
+
+\DeclareNameAlias{author}{last-first}
+
+\addbibresource{ref.bib}
+
+\newtheorem{definition}{Definition}[section]
+
+\newaliascnt{theorem}{definition}
+\newtheorem{theorem}[theorem]{Theorem}
+\aliascntresetthe{theorem}
+
+\crefname{definition}{definition}{definitions}
+\Crefname{definition}{Definition}{Definitions}
+
+\crefname{theorem}{theorem}{theorems}
+\Crefname{theorem}{Theorem}{Theorems}
+
+\title{MEGPD Markov Process: properties and their proofs}
+
 \author{Andrea Ferrero}
 
 \begin{document}
@@ -11,7 +45,7 @@
 
 \section{Model definition}
 
-The Markov chain is defined on a continuous state space by the transition density $p(y|x) = p(x,y) / p_X(x)$ where the joint density is that of the multivariate EGP model and the common marginal $p_X(x)$ is the implied Extended GPD.
+The Markov process is defined on a continuous state space by the transition density $p(y|x) = p(x,y) / p_X(x)$ where the joint density is that of the multivariate EGPD (MEGPD) and the common marginal $p_X(x)$ is the implied Extended GPD (EGPD).
 
 More precisely, the EGPD distribution function is defined by:
 
@@ -53,67 +87,336 @@ where $p_R$ is another EGPD density (note that the sum of EGPD leads to an EGPD 
 
 Note that both the joint and the marginal densities are continuous and positive on $(0, \infty)^2$ and $(0, \infty)$, respectively.
 
-\section{Ergodicity of the Markov chain}
+\section{Ergodicity of the MEGPD Markov Process}
 
-Using the MEGPD to construct a Markov chain (of order one) we can show that the resulting chain is ergodic.
+To fix notation, we generally work on a measurable space $(E, \mathcal{E})$, where in our case $E = (0, \infty)$ and $\mathcal{E}$ is the Borel $\sigma$-algebra on $E$.
 
-Recall that for a Markov chain to be ergodic, we need to show that it adimts a \textbf{stationary} distribution and that the chain is \textbf{irreducible} and \textbf{aperiodic}.
+\begin{definition}[Markov transition kernel]
+  A Markov transition kernel is a function
+  \[
+    \Pi : E \times \mathcal{E} \to [0,1]
+  \]
+  such that:
+  \begin{enumerate}
+    \item For every $x \in E$, the function $A \mapsto \Pi(x,A)$ is a probability measure on $(E,\mathcal{E})$.
+    \item For every $A \in \mathcal{E}$, the function $x \mapsto \Pi(x,A)$ is measurable.
+  \end{enumerate}
+  The quantity $\Pi(x,A)$ represents the probability of moving to a measurable set $A$ from a starting state $x$.
+\end{definition}
 
-To fix notation, we generally work on a measurable space $(E, \mathcal{E})$, where in our case $E = (0, \infty)$, from which we define the Markov transition kernel as the function:
+In our case, the transition probability admits a density $p(y \mid x)$ with respect to the Lebesgue measure, so that
 
-\begin{equation}
-  \Pi: (E, \mathcal{E}) \to [0, 1],
-\end{equation}
+\[
+  \Pi(x,A) = \int_A p(y \mid x)\,dy.
+\]
 
-which represents the probability of moving to a measurable set A from a starting state x. Indeed, if the transition probability admits a density (as in our case):
+We denote by $\Pi^n(x,A)$ the probability of starting from $x$ and landing in $A$ after $n$ steps.
 
-\begin{equation}
-  \Pi(x, A) = \int_A p(y \mid x) dy.
-\end{equation}
+Using the MEGPD to construct a Markov process of order one, we can show that the resulting process is ergodic.
 
-When we write $\Pi^n(x, A)$, we refer to the probability of starting from $x$ and landing in A after n steps.
+Recall that, in order for a Markov process to be ergodic, we need to show that it admits a stationary distribution and that the process is irreducible and aperiodic.
+
+We refer to \textcite[Theorem 4]{roberts2004} where the only assumption is that the $\sigma$-algebra needs to be countably generated, which is the case for the usual Borel $\sigma$-algebra we are considering as mentioned by the authors. The theorem is stated under $\pi-a.s.$ (with $\pi$ the stationary distribution) but later it is mentioned that for absolutely continuous transition distributions with respect to $\pi$ the theorem holds for all $x \in E$. More generally, Harris recurrence is invoked.
 
 \subsection{Stationarity}
 
-We can show that the Markov chain defined by the MEPGD adimts a stationary distribution $\pi$, which coincides with the common marginal EGPD $p_X$, simply by using the fact that the joint distribution is symmetric, because it is the product of $p_R(x+y)$ (symmetric), $\phi_\delta(x+y)(\log \frac{x}{y})$ (symmetric by definition), the Jacobian product (symmetric as well). It suffices then to show the detailed balance condition.
+We can show that the Markov process defined by the MEGPD admits a stationary distribution $\pi$, which coincides with the common marginal EGPD $p_X$.
 
-In general, the detailed balance condition says that for $\pi$ a stationary distribution (or raher its density) the following holds true:
+The key observation is that the joint distribution is symmetric. Indeed, it is constructed from $p_R(x+y)$, which is symmetric in $x$ and $y$, the normal density $\phi_{\delta(x+y)}(\log(x/y))$, which is symmetric by definition, and the Jacobian product, which is symmetric as well.
 
-\begin{equation}
-  \pi(x) p(y \mid x) = \pi(y) p(x \mid y).
-\end{equation}
+It therefore suffices to establish the detailed balance condition.
 
-For our case, this immediate with $\pi = p_X$ because the joint distribution is symmetric:
-\begin{equation*}
-  p_X(x) p(y \mid x) = p(x,y) = p(y,x) = p_X(y) p(x \mid y).
-\end{equation*}
+\begin{definition}[Stationary distribution]
+  A probability measure $\pi$ on $(E,\mathcal{E})$ is said to be stationary for the Markov transition kernel $\Pi$ if
+  \[
+    \pi(A) = \int_E \Pi(x,A)\,\pi(dx),
+    \qquad A \in \mathcal{E}.
+  \]
+  If $\pi$ admits a density with respect to the Lebesgue measure, we denote this density by $\pi(x)$.
+
+\end{definition}
+
+\begin{theorem}[Detailed balance and stationarity]
+  Let $\Pi$ be a Markov transition kernel on $(E,\mathcal{E})$, admitting a transition density $p(y \mid x)$ with respect to the Lebesgue measure. If a probability density $\pi$ satisfies the detailed balance condition
+  \[
+    \pi(x)p(y \mid x)
+    =
+    \pi(y)p(x \mid y)
+  \]
+  for almost every $(x,y) \in E^2$, then $\pi$ is a stationary density for the Markov process.
+\end{theorem}
+
+\begin{proof}
+  By definition, a density $\pi$ is stationary if
+  \[
+    \int_E \pi(x)p(y \mid x)\,dx = \pi(y).
+  \]
+  Using the detailed balance condition, we obtain
+  \[
+    \begin{aligned}
+      \int_E \pi(x)p(y \mid x)\,dx
+       & = \int_E \pi(y)p(x \mid y)\,dx \\
+       & = \pi(y)\int_E p(x \mid y)\,dx \\
+       & = \pi(y),
+    \end{aligned}
+  \]
+  where the last equality follows from the fact that $p(\cdot \mid y)$ is a probability density. Therefore, $\pi$ is stationary.
+\end{proof}
+
+\begin{theorem}[Stationarity of the MEGPD Markov process]
+  Suppose that the joint density $p(x,y)$ of the MEGPD is symmetric, that is,
+  \[
+    p(x,y) = p(y,x).
+  \]
+  Then the common marginal density $p_X$ is a stationary distribution for the Markov process.
+\end{theorem}
+
+\begin{proof}
+  Since the joint distribution admits the factorization
+  \[
+    p(x,y) = p_X(x)p(y \mid x),
+  \]
+  its symmetry gives
+  \[
+    \begin{aligned}
+      p_X(x)p(y \mid x)
+       & = p(x,y)             \\
+       & = p(y,x)             \\
+       & = p_X(y)p(x \mid y).
+    \end{aligned}
+  \]
+  Hence, the detailed balance condition holds with $\pi = p_X$ and $p_X$ is stationary.
+\end{proof}
 
 \subsection{Irreducibility}
-In general, irreducibility (with respect to some measure, here the Lebesgue measure $\lambda$) says that for every starting state $x$, and every measurable set A with $\lambda(A)$, there exists an integer $n \geq 1$ such that the transition distribution $P^n(x, A) > 0$.
 
-In our case, this is immediate from the assumption that both the joint and marginal densities of the Markov chain (and therefore the conditional density) are positive on $E = (0, \infty)$. For $n=1$, we have that:
+We now show that the Markov process is irreducible with respect to the Lebesgue measure $\lambda$.
 
-\begin{equation*}
-  P(x, A) = \int_A k(y \mid x) dy > 0.
-\end{equation*}
+\begin{definition}[$\lambda$-irreducibility]
+  A Markov process with transition kernel $\Pi$ is said to be $\lambda$-irreducible if, for every $x \in E$ and every measurable set $A \in \mathcal{E}$ satisfying $\lambda(A)>0$, there exists an integer $n \geq 1$ such that
+  \[
+    \Pi^n(x,A)>0.
+  \]
+\end{definition}
 
-This follows from the following fact. For fixed x, define:
+In our case, irreducibility follows directly from the assumption that both the joint and marginal densities of the Markov process are positive on $E=(0,\infty)$. Consequently, the conditional density $p(y \mid x)$ is also positive on $E$.
 
-\begin{equation*}
-  A_m = \{ y \in A : p(y \mid x) \geq \frac{1}{m}\}.
-\end{equation*}
+\begin{theorem}[Irreducibility of the MEGPD Markov process]
+  Suppose that the conditional density satisfies
+  \[
+    p(y \mid x)>0,
+    \qquad x,y \in E.
+  \]
+  Then the Markov process is $\lambda$-irreducible.
+\end{theorem}
 
-from which we have $A = \bigcup A_m$ because of the positivity of the conditional density. Since we assumed that $\lambda(A) > 0$, it must be that there exist some $n$ such that $\lambda(A_m)>0$. Therefore:
+\begin{proof}
+  It is sufficient to consider $n=1$. Let $x \in E$ be arbitrary and let $A \in \mathcal{E}$ satisfy $\lambda(A)>0$.
 
-\begin{align*}
-  \int_A p(y \mid x) dy &\geq \int_{A_m} p(y \mid x) dy \\
-                        &\geq \frac{1}{m} \lambda(A_m) \\
-                        &> 0
-\end{align*}
+  For every $m \geq 1$, define
+  \[
+    A_m =
+    \left\{
+    y \in A :
+    p(y \mid x) \geq \frac{1}{m}
+    \right\}.
+  \]
+  Since the conditional density is strictly positive, we have
+  \[
+    A = \bigcup_{m=1}^{\infty} A_m.
+  \]
+  As $\lambda(A)>0$, there must exist some $m \geq 1$ such that $\lambda(A_m)>0$.
 
-Irreducibility also guarantees that the stationary distribution is unique.
+  Therefore,
+  \[
+    \begin{aligned}
+      \Pi(x,A)
+       & = \int_A p(y \mid x)\,dy        \\
+       & \geq \int_{A_m} p(y \mid x)\,dy \\
+       & \geq \frac{1}{m}\lambda(A_m)    \\
+       & > 0.
+    \end{aligned}
+  \]
+  Hence, the Markov process is $\lambda$-irreducible.
+\end{proof}
+
+Irreducibility also guarantees that the stationary distribution is unique, provided the process admits a stationary probability distribution.
 
 \subsection{Small Sets}
-For aperiodicity as well as for later, we need to define what we mean by small sets.
+
+For aperiodicity, as well as for later results, we need to introduce the notion of a small set.
+
+\begin{definition}[$n$-small set]
+  Let $\Pi$ be a Markov transition kernel on $(E,\mathcal{E})$. A measurable set $C \in \mathcal{E}$ is said to be $n$-small if there exist a nonzero finite measure $\nu$ on $(E,\mathcal{E})$ and a constant $\varepsilon>0$ such that
+  \[
+    \Pi^n(x,A)
+    \geq \varepsilon \nu(A),
+    \qquad x \in C,\ A \in \mathcal{E}.
+  \]
+\end{definition}
+
+Now we want to prove that compact sets are small sets if the conditional density is positive.
+
+\begin{theorem}[Compact sets are small]
+  \label{thm:compact-small}
+  Suppose that the conditional density $p(y \mid x)$ is strictly positive and continuous on $E \times E$, where $E=(0,\infty)$.
+
+  Then, for any compact sets $C,K \subset E$ with $\lambda(K)>0$, the set $C$ is $1$-small.
+\end{theorem}
+
+\begin{proof}
+  Let $C \subset E$ be compact and choose a compact set $K \subset E$ such that $\lambda(K)>0$.
+
+  Since $C$ and $K$ are compact, their Cartesian product $C \times K$ is also compact. Moreover, by assumption, the conditional density $p(y \mid x)$ is continuous and strictly positive on $E \times E$.
+
+  Therefore, by the Extreme Value Theorem, there exist $(x_0, y_0) \in C \times K$ such that
+
+  \[
+    m
+    =
+    \min_{(x,y)\in C\times K} p(y \mid x) = p(y_0 \mid x_0) > 0,
+  \]
+  where we used the fact that the conditional density is positive.
+
+  Consequently, for every $x\in C$ and every $A\in\mathcal{E}$,
+  \[
+    \begin{aligned}
+      \Pi(x,A)
+       & = \int_A p(y \mid x)\,dy           \\
+       & \geq \int_{A\cap K}p(y \mid x)\,dy \\
+       & \geq m \int_{A\cap K}dy            \\
+       & = m \lambda(A\cap K).
+    \end{aligned}
+  \]
+
+  Defining the measure
+  \[
+    \nu(A)=\frac{\lambda(A\cap K)}{\lambda(K)},
+    \qquad A\in\mathcal{E},
+  \]
+  we obtain a probability measure supported on $K$. Hence,
+  \[
+    \Pi(x,A)
+    \geq m \lambda(K)\nu(A),
+    \qquad x\in C,\ A\in\mathcal{E}.
+  \]
+
+  Thus, taking $\varepsilon = m \lambda(K)>0$, we obtain
+  \[
+    \Pi(x,A) \geq \varepsilon \nu(A),
+    \qquad x \in C,\ A \in \mathcal{E}.
+  \]
+  Therefore, $C$ is $1$-small.
+\end{proof}
+
+\subsection{Aperiodicity}
+
+From \textcite[Definition D.2.3]{kulik2020}, we can see a convenient definition of aperiodicity in terms of small sets:
+
+\begin{definition}[Aperiodicity]
+  A markov kernel $\Pi$ which admits an accessible small set $C$, i.e. a set for which the return times are almost surely finite, is said to be aperiodic if there exists no integer $c > 1$ such that:
+
+  \begin{equation*}
+    \{n \in \mathbb{N}^* : inf_{x \in C} \Pi^n (x, C) > 0\} \subset \{c, 2c, 3c, \dots\} .
+  \end{equation*}
+\end{definition}
+
+Moreover, they mention a convenient criterion for aperiodicity: the kernel $\Pi$ is aperiodic if and only if there exists an \textbf{increasing countable} union of small sets. \parencite[Lemma D.2.4]{kulik2020}
+
+Incidentally, if a Markov process has an accessible small set it is said to be irreducible (proving in a different way that the MEGPD Markov process is irreducible).
+
+\begin{theorem}[Aperiodicity of the MEGPD Markov process]
+  Suppose that the conditional density $p(y\mid x)$ is strictly positive and continuous on $E\times E$, where $E=(0,\infty)$.
+
+  Then the Markov kernel $\Pi$ is aperiodic.
+\end{theorem}
+
+\begin{proof}
+  From \cref{thm:compact-small}, every compact subset of $E$ is small.
+
+  Consider the sequence of compact intervals
+  \[
+    C_n=\left[\frac{1}{n},n\right],
+    \qquad n\geq 1.
+  \]
+
+  Clearly, each $C_n$ is compact and the sequence is increasing, since
+  \[
+    C_n\subseteq C_{n+1},
+    \qquad n\geq 1.
+  \]
+
+  Furthermore, we have
+  \[
+    \bigcup_{n=1}^{\infty}C_n
+    =(0,\infty)=E.
+  \]
+
+  Since every $C_n$ is compact, it is also small by the preceding result. We have therefore constructed an increasing countable union of small sets covering the entire state space.
+
+  Hence, by \textcite{kulik2020}, Lemma D.2.4, the Markov kernel $\Pi$ is aperiodic.
+\end{proof}
+
+\subsection{Ergodicity}
+
+\begin{definition}[Total variation distance]
+  The total variation distance between two probability measures $\nu_1(\cdot)$ and $\nu_2(\cdot)$ is:
+
+  \[
+    \left\| \nu_1(\cdot) - \nu_2(\cdot) \right\|_{\mathrm{TV}} = \sup_A \mid \nu_1(A) - \nu_2(A) \mid
+  \]
+\end{definition}
+
+\begin{theorem}[Ergodicity of the MEGPD Markov process]
+  \label{thm:megpd-ergodicity}
+  Suppose that the joint density of the MEGPD model is strictly positive and continuous on $E\times E$, where $E=(0,\infty)$, and symmetric with respect to its arguments.
+
+  Then the Markov process constructed from the MEGPD model is irreducible and aperiodic, with unique stationary distribution given by the common marginal EGPD density $p_X$.
+
+  Moreover, for any initial state $X_0=x\in E$,
+  \[
+    \lim_{n\to\infty}
+    \left\|\Pi^n(x,\cdot)-\pi(\cdot)\right\|_{\mathrm{TV}}
+    =0,
+  \]
+  where $\pi(dx)=p_X(x)\,dx$.
+
+  In particular, $\lim_{n \to \infty} \Pi^n(x, A) = \pi(A)$ for all measurable $A \subseteq \mathcal{E}$
+\end{theorem}
+
+\section{Geometric Ergodicity}
+After having shown that the Markov process is ergodic, we might want to know how long does it take for the chain to reach the stationary distribution.
+
+\begin{definition}[Geometric Ergodicity]
+  A Markov process with stationary distribution $\pi$ is geometrically ergodic if:
+
+  \[
+  \left\| \Pi^n(x, \cdot) - \pi(\cdot) \right\| \leq M(x) \rho^n
+  \]
+
+  for some $\rho < 1$, where $M(x) < \infty$ for $\pi-a.e.$ $x \in E$. 
+\end{definition}
+
+To ensure geometric ergodicity, we need to satisfy a certain drift condition:
+
+\begin{definition}[Drift condition]
+  The Markov process is said to satisfy a drift condition for a given set $C$ if there are constants $\lambda (0, 1)$ and $b < \infty$ and a function $V: E \to [1, \infty]$ such that:
+  \[
+    PV \leq \lambda V + b \mathds{1}_C ,
+  \]
+  where the function $PV$ refers to the conditional expectation $\mathbb{E}\left[V(y) \mid X = x\right]$
+\end{definition}
+
+\begin{theorem}[Drift condition, small sets and geometric ergodicity]
+  Conider a $\phi$-irreducible, aperiodic Markov process with stationary distribution $\pi$. Suppose that for a small set $C \subset E$ the drift condition holds. Then the process is geometrically ergodic.
+\end{theorem}
+
+We are going to try to prove the drift condition for the MEGPD Markov process focusing on compact sets thanks to \cref{thm:compact-small}.
+
+\subsection{Current proof status of Geometric Ergodicity}
+
+We need to show that $\mathbb{E}[V(y) \mid X = x] \leq \lambda V(x) + \mathds{1}_C$ with $V \geq 1$, $\lambda \in (0, 1)$ for some choice of $V$.
+
+We can 
 
 \end{document}
