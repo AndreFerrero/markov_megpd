@@ -6,6 +6,7 @@
 \usepackage{cleveref}
 \usepackage{aliascnt}
 \usepackage{dsfont}
+\usepackage[left=2cm, right=2cm]{geometry}
 
 \usepackage[
     backend=biber,
@@ -61,7 +62,7 @@ The density $f(x)$ of an EGPD is:
   f(x) = \kappa h_\xi(x) H_\xi(x)^{\kappa-1} b(H_\xi(x)^\kappa).
 \end{equation*}
 
-Recall that the EGPD is a regularly varing random variable both at infinity and at zero, more precisely $X \in RV_{\frac{1}{\xi}}^\infty$ and $X \in RV_\kappa^0$. Regular variation at infinity and at zero come from the conditions imposed on the $B$ function.
+Recall that the EGPD is regularly varing both at infinity and at zero, more precisely $X \in RV_{\frac{1}{\xi}}^\infty$ and $X \in RV_\kappa^0$. Regular variation at infinity and at zero come from the conditions imposed on the $B$ function.
 
 Namely, we have that:
 
@@ -122,9 +123,9 @@ We refer to \textcite[Theorem 4]{roberts2004} where the only assumption is that 
 
 We can show that the Markov process defined by the MEGPD admits a stationary distribution $\pi$, which coincides with the common marginal EGPD $p_X$.
 
-The key observation is that the joint distribution is symmetric. Indeed, it is constructed from $p_R(x+y)$, which is symmetric in $x$ and $y$, the normal density $\phi_{\delta(x+y)}(\log(x/y))$, which is symmetric by definition, and the Jacobian product, which is symmetric as well.
+The key observation is that the joint distribution is symmetric. Indeed, it is constructed from $p_R(x+y)$, which is symmetric in $x$ and $y$, the normal density $\phi_{\delta(x+y)}(\log(x/y))$, which is symmetric by definition and we can always exchange $\log x/y = - \log y/x$, and the Jacobian product, which is symmetric as well.
 
-It therefore suffices to establish the detailed balance condition.
+Therefore, it suffices to establish the detailed balance condition.
 
 \begin{definition}[Stationary distribution]
   A probability measure $\pi$ on $(E,\mathcal{E})$ is said to be stationary for the Markov transition kernel $\Pi$ if
@@ -255,7 +256,7 @@ For aperiodicity, as well as for later results, we need to introduce the notion 
   \]
 \end{definition}
 
-Now we want to prove that compact sets are small sets if the conditional density is positive.
+Now we want to prove that compact sets are small sets if the conditional density is continuous and positive.
 
 \begin{theorem}[Compact sets are small]
   \label{thm:compact-small}
@@ -369,9 +370,11 @@ Incidentally, if a Markov process has an accessible small set it is said to be i
 
 \begin{theorem}[Ergodicity of the MEGPD Markov process]
   \label{thm:megpd-ergodicity}
-  Suppose that the joint density of the MEGPD model is strictly positive and continuous on $E\times E$, where $E=(0,\infty)$, and symmetric with respect to its arguments.
+  Consider the measure space $E, \mathcal{E}$ where $\mathcal{E}$ is countably generated (like the Borel $\sigma$-algebra).
 
-  Then the Markov process constructed from the MEGPD model is irreducible and aperiodic, with unique stationary distribution given by the common marginal EGPD density $p_X$.
+  Suppose that the joint density of the MEGPD is strictly positive and continuous on $E\times E$, where $E=(0,\infty)$, and symmetric with respect to its arguments.
+
+  Then the Markov process constructed from the MEGPD is irreducible and aperiodic, with unique stationary distribution given by the common marginal EGPD density $p_X$.
 
   Moreover, for any initial state $X_0=x\in E$,
   \[
@@ -385,13 +388,13 @@ Incidentally, if a Markov process has an accessible small set it is said to be i
 \end{theorem}
 
 \section{Geometric Ergodicity}
-After having shown that the Markov process is ergodic, we might want to know how long does it take for the chain to reach the stationary distribution.
+After having shown that the Markov process is ergodic, we might want to know how long it takes for the chain to reach the stationary distribution.
 
 \begin{definition}[Geometric Ergodicity]
   A Markov process with stationary distribution $\pi$ is geometrically ergodic if:
 
   \[
-  \left\| \Pi^n(x, \cdot) - \pi(\cdot) \right\| \leq M(x) \rho^n
+  \left\| \Pi^n(x, \cdot) - \pi(\cdot) \right\|_{\mathrm{TV}} \leq M(x) \rho^n
   \]
 
   for some $\rho < 1$, where $M(x) < \infty$ for $\pi-a.e.$ $x \in E$. 
@@ -415,8 +418,110 @@ We are going to try to prove the drift condition for the MEGPD Markov process fo
 
 \subsection{Current proof status of Geometric Ergodicity}
 
-We need to show that $\mathbb{E}[V(y) \mid X = x] \leq \lambda V(x) + \mathds{1}_C$ with $V \geq 1$, $\lambda \in (0, 1)$ for some choice of $V$.
+We need to show that $\mathbb{E}[V(y) \mid X = x] \leq \lambda V(x) + \mathds{1}_C$ with $V \geq 1$, $\lambda \in (0, 1)$ for some choice of $V$ and for a small (therefore compact) set $C$.
 
-We can 
+We can check the drift condition with $V(x) = x^s + x^{-s}$ for some s (maybe restricted).
+
+We shall prove:
+
+\[
+lim_{x \to \infty} \frac{PV(y)}{V(x)} < 1
+\]
+
+\[
+lim_{x \to 0} \frac{PV(y)}{V(x)} < 1
+\]
+
+Consider the following change of variable:
+
+\[
+Y = U x \quad \quad dy = x du \implies \frac{dy}{du} = x
+\]
+
+The following joint density is:
+
+\begin{align*}
+  p(x, u) &= p_R(x + ux) \phi_{\delta(x + ux)}(\log \frac{x}{ux}) \frac{x + ux}{x(ux)} x \\
+          &= p_R(x(1+x)) \phi_{\delta(x(1+u))}(\log u) \frac{1+u}{u} \\
+          &= p_R(x(1+x)) \ell_{\delta(x(1+u))}(u) (1+u),
+\end{align*}
+
+with $\ell_\delta$ the lognormal density.
+
+The equivalent conditional density under this change of variable is:
+
+\[
+  q_x(u) := p(u \mid x) = \frac{p(x, u)}{p_X(x)}
+\]
+
+With this change of variable:
+
+\begin{align*}
+  \mathbb{E}[V(y) \mid X = x] &= \mathbb{E}[x^s U^s + x^{-s} U^{-s} \mid X = x] \\
+                              &= x^s \mathbb{E}[U^s \mid X = x] + x^{-s} \mathbb{E}[U^{-s} \mid X = x] 
+\end{align*}
+
+Then we have:
+
+\[
+  \frac{PV(x)}{V(x)} = \frac{\mathbb{E}[V(y) \mid X = x]}{x^s + x^{-s}} = \frac{x^s}{x^s + x^{-s}} \mathbb{E}[U^s \mid X = x] + \frac{x^s}{x^s + x^{-s}} \mathbb{E}[U^{-s} \mid X = x]
+\]
+
+which ultimetely leads to:
+
+\[
+  \lim_{x \to \infty} \frac{PV(x)}{V(x)} = \lim_{x \to \infty} \mathbb{E}[U^s \mid X = x]
+\]
+
+\[
+  \lim_{x \to 0} \frac{PV(x)}{V(x)} = \lim_{x \to 0} \mathbb{E}[U^{-s} \mid X = x]
+\]
+
+Consider the limit of the conditional density:
+
+\[
+  \lim_{x \to \infty} \frac{p_R(x(1+u)) \ell_{\delta}(u) (1+u)}{p_X(x)}.
+\]
+
+We have $\ell_\delta(u) \to \ell_{\delta_\infty}$, but for the ratio of regularly varying densities we can only say something if we assume $\frac{L_R(x)}{L_X(x)} \to c$, where $L$ is the generic slowly varying function of the regular variation definition. Note that $\xi_R = \xi_X = \xi$, so we have:
+
+\[
+\frac{p_R(x(1+u))}{p_X(x)} = (1+u)^{-\frac{1}{\xi} - 1} \frac{L_R(x)}{L_X(x)},
+\]
+
+therefore:
+
+\[
+  \lim_{x \to \infty} \frac{p_R(x(1+u)) \ell_{\delta}(u) (1+u)}{p_X(x)} = c (1+u)^{-\frac{1}{\xi} - 1} = q_\infty
+\]
+
+The conditional density is also upper bounded (for Dominated Convergence Theorem to exchange lim and expectation). For the radial component, note that the following ratio is finite at the limit:
+
+\[
+  \lim_{x \to \infty}\frac{p_R(x)}{p_X(x)} = \frac{b_R(1) \kappa_R}{b_X(1) \kappa_X} > 0
+\]
+
+and regularly varying functions are bounded by Potter bounds for $\varepsilon > 0$:
+
+\[
+  \frac{p_R(x(1+u))}{p_R(x)} \leq C (1+u)^{-\frac{1}{\xi} - 1 + \varepsilon}
+\]
+
+Putting everything together:
+\[
+  \frac{p_R(x(1+u))}{p_R(x)} \cdot \frac{p_R(x)}{p_X(x)} \leq C^* (1+u)^{-\frac{1}{\xi} - 1 + \varepsilon} 
+\] 
+
+The lognormal component is bounded for $\delta \in [\delta_{-}, \delta_{+}]$ by:
+
+\[
+  L(u) = (2 \pi)^{-1/2} \delta_{-}^{-1} u^{-1} \exp\{\frac{-(\log u)^2}{2 \delta_{+}^2}\}
+\]
+
+Now if we were to consider the conditional expectation at the limit, we would have to bound:
+
+\[
+  u^s q_x(u) = u^s \frac{p_R(x(1+u))}{p_R(x)} \ell_{\delta(x(1+u))}(u) (1+u) \leq C^* u^s (1+u)^{-\frac{1}{\xi} + \varepsilon} L(u)
+\]
 
 \end{document}
